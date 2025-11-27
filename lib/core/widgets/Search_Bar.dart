@@ -4,41 +4,53 @@ class SearchBar1 extends StatelessWidget {
   final TextEditingController controller;
   final Function(String) onChanged;
 
-  const SearchBar1({Key? key, required this.controller, required this.onChanged}) : super(key: key);
+  const SearchBar1({super.key, required this.controller, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    // Detectamos el modo oscuro
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Definimos los colores según el modo
+    // Gris moderno (Charcoal) para dark mode, Blanco para light mode
+    final backgroundColor = isDarkMode ? const Color(0xFF2A2A2A) : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final hintColor = isDarkMode ? Colors.grey[400] : Colors.grey;
+    final borderColor = isDarkMode ? Colors.transparent : Colors.grey.shade300;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25.0), // Bordes redondeados más suaves
-          color: Colors.white, // Fondo blanco
+          borderRadius: BorderRadius.circular(25.0),
+          color: backgroundColor, // ✅ Fondo adaptable
           boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(75, 73, 73, 0.259), // Usamos RGBA para control de opacidad
-              blurRadius: 10.0, // Sombra difusa
-              offset: const Offset(0, 5), // Dirección de la sombra
+              // Sombra más sutil en modo oscuro
+              color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.1),
+              blurRadius: 10.0,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: TextField(
           controller: controller,
           onChanged: onChanged,
+          style: TextStyle(color: textColor), // ✅ El texto que escribes se ve blanco en modo oscuro
           decoration: InputDecoration(
             hintText: 'Search...',
-            hintStyle: const TextStyle(color: Colors.grey), // Estilo del texto del hint
+            hintStyle: TextStyle(color: hintColor), // ✅ Hint gris suave
             prefixIcon: const Icon(
               Icons.search,
-              color: Colors.deepPurple, // Icono con color morado
+              color: Colors.deepPurple,
             ),
-            border: InputBorder.none, // Sin borde adicional
-            focusedBorder: InputBorder.none, // Sin borde cuando se enfoca
+            border: InputBorder.none,
+            focusedBorder: InputBorder.none,
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1), // Borde sutil cuando no está enfocado
-              borderRadius: BorderRadius.circular(25.0), // Bordes redondeados
+              borderSide: BorderSide(color: borderColor, width: 1), // ✅ Borde solo en modo claro
+              borderRadius: BorderRadius.circular(25.0),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0), // Espaciado dentro del TextField
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           ),
         ),
       ),

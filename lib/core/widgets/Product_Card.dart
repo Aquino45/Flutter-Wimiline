@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../features/productos/data/product_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:proyecto/features/carrito/data/carrito_service.dart';
+import '../../features/productos/data/product_model.dart';
+
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback? onTap;
@@ -13,23 +15,25 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos un placeholder si no hay URL de imagen válida
-    final String imageUrl = (product.imagenUrl.isNotEmpty)
+    final imageUrl = (product.imagenUrl.isNotEmpty)
         ? product.imagenUrl
         : 'https://via.placeholder.com/150';
+
+    // Detectamos si es modo oscuro para ajustar colores manualmente si es necesario
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        elevation: 4, // Un poco menos de sombra para que se vea más ligero
+        elevation: 4,
+        color: Theme.of(context).cardColor, 
         shadowColor: Colors.black26,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Radio un pelín más ajustado
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. SECCIÓN DE IMAGEN
             Expanded(
               flex: 3,
               child: ClipRRect(
@@ -37,15 +41,14 @@ class ProductCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Container(color: Colors.grey[100]),
-            CachedNetworkImage(
+  
+                    Container(color: isDark ? Colors.grey[800] : Colors.grey[100]),
+                    CachedNetworkImage(
                       imageUrl: imageUrl,
-                      fit: BoxFit.contain,
-                      // 1. Widget de error (Reemplaza a errorBuilder)
+                      fit: BoxFit.contain, 
                       errorWidget: (context, url, error) => const Center(
                         child: Icon(Icons.broken_image, color: Colors.grey),
                       ),
-                      // 2. Widget de carga con progreso (Reemplaza a loadingBuilder)
                       progressIndicatorBuilder: (context, url, downloadProgress) {
                         return Center(
                           child: SizedBox(
@@ -53,7 +56,6 @@ class ProductCard extends StatelessWidget {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              // downloadProgress.progress ya te da el valor entre 0.0 y 1.0
                               value: downloadProgress.progress,
                             ),
                           ),
@@ -65,62 +67,81 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // 2. SECCIÓN DE DETALLES (Más compacta)
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0), // Padding REDUCIDO
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Título del producto
                     Text(
                       product.nombre,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 13, // Letra un poco más pequeña (era 14)
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                        height: 1.1, // Altura de línea ajustada
+                        color: isDark ? Colors.white70 : Colors.grey[800], 
+                        height: 1.1,
                       ),
                     ),
 
-                    // Fila con Precio y Botón
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Precio
                         Text(
                           '\$${product.precio.toStringAsFixed(2)}',
                           style: TextStyle(
-                            fontSize: 15, // Letra ajustada (era 18)
+                            fontSize: 15,
                             fontWeight: FontWeight.w800,
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
-                        // Botón pequeño
+
                         Material(
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(6),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(6),
                             onTap: () {
+
+                              CarritoService.instance.addToCart(product);
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('${product.nombre} agregado!'),
-                                  duration: const Duration(milliseconds: 600),
+                                  content: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          "${product.nombre} agregado",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  backgroundColor: Colors.green.shade600,
                                   behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(
+                                    seconds: 1,
+                                  ), // Más rápido
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                 ),
                               );
+
                             },
                             child: const Padding(
-                              padding: EdgeInsets.all(5.0), // Padding del botón reducido
+                              padding: EdgeInsets.all(5.0),
                               child: Icon(
                                 Icons.add_shopping_cart_rounded,
-                                size: 18, // Icono más pequeño
+                                size: 18,
                                 color: Colors.white,
                               ),
                             ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:proyecto/core/utils/token_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_profile_model.dart';
 import '../../../core/utils/session_helper.dart'; // 👈 Importa el helper
@@ -7,10 +8,10 @@ import '../../../core/utils/session_helper.dart'; // 👈 Importa el helper
 class ProfileService {
   final String _url = "http://10.0.2.2:8081/api/usuarios/me/perfil";
 
-  Future<UserProfile?> getUserProfile() async {
+Future<UserProfile?> getUserProfile() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
+      // ✅ CAMBIO: Leer del almacenamiento seguro
+      final token = await TokenService.getToken();
 
       if (token == null) return null;
 

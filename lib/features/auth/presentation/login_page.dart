@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:proyecto/core/utils/token_service.dart';
 import 'package:proyecto/core/widgets/custom_input.dart';
 import 'package:proyecto/features/auth/data/login_repository_impl.dart';
 import 'package:proyecto/features/auth/domain/usuario_login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -19,17 +19,15 @@ class LoginPage extends StatelessWidget {
         password: password.text,
       );
 
-      final token = await repo.login(user);
+    final token = await repo.login(user);
 
       if (token.isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
+        // ✅ CAMBIO: Usar TokenService en lugar de SharedPreferences
+        await TokenService.saveToken(token); 
 
         if (context.mounted) {
           Navigator.pushReplacementNamed(context, '/main');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Bienvenido")),
-          );
+          // ...
         }
       }
     } catch (e) {

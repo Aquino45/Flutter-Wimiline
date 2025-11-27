@@ -1,4 +1,5 @@
 class Product {
+  final String id; // 👈 NUEVO CAMPO IMPORTANTE
   final String idCategoria;
   final String nombre;
   final String? descripcion;
@@ -9,6 +10,7 @@ class Product {
   final bool activo;
 
   Product({
+    required this.id, // 👈 Agrégalo al constructor
     required this.idCategoria,
     required this.nombre,
     this.descripcion,
@@ -21,6 +23,9 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
+      // 👈 Mapea el UUID que viene del backend
+      id: json['productoId'] ?? '', 
+      
       idCategoria: json['categoriaId'] ?? '',
       nombre: json['nombre'] ?? '',
       descripcion: json['descripcion'],
