@@ -92,8 +92,8 @@ class ProductCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${product.precio.toStringAsFixed(2)}',
-                          style: TextStyle(
+                          'S/. ${product.precio.toStringAsFixed(2)}', 
+                            style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                             color: Theme.of(context).colorScheme.primary,

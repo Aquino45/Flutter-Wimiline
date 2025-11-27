@@ -11,18 +11,12 @@ class CarritoPage extends StatefulWidget {
 }
 
 class _CarritoPageState extends State<CarritoPage> {
-  // Estados para la selección de fecha y hora
   DateTime? _selectedDate;
-  String _selectedTimeSlot = "11 AM - 12 PM"; // Valor por defecto o null
+  String _selectedTimeSlot = "11 AM - 12 PM"; 
   
-  // Opciones de horarios (hardcoded por ahora, podrían venir del backend)
   final List<String> _timeSlots = [
-    "8 AM - 11 AM",
-    "11 AM - 12 PM",
-    "12 PM - 2 PM",
-    "2 PM - 4 PM",
-    "4 PM - 6 PM",
-    "6 PM - 8 PM",
+    "8 AM - 11 AM", "11 AM - 12 PM", "12 PM - 2 PM",
+    "2 PM - 4 PM", "4 PM - 6 PM", "6 PM - 8 PM",
   ];
 
   @override
@@ -31,20 +25,52 @@ class _CarritoPageState extends State<CarritoPage> {
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final cardColor = Theme.of(context).cardColor;
     
-    // Colores basados en tu imagen (Tonos lilas/morados)
     final primaryPurple = Colors.deepPurple;
     final lightPurpleBg = isDarkMode ? Colors.deepPurple.withOpacity(0.1) : Colors.deepPurple.shade50;
+    
+
+    final canPop = Navigator.canPop(context);
 
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text("Mi Bolsa", style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: false,
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // Eliminamos el botón de atrás si es una página principal del BottomNav
         automaticallyImplyLeading: false, 
+        
+
+        leading: canPop ? Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.black.withOpacity(0.4) : Colors.white.withOpacity(0.7),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, size: 20),
+
+            color: isDarkMode ? Colors.white : Colors.black87,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ) : null, 
+
+        actions: [
+
+          Container(
+            margin: const EdgeInsets.only(right: 15),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.shade200,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(Icons.delete_outline_rounded, color: isDarkMode ? Colors.white : Colors.grey.shade700),
+              onPressed: () => _showClearDialog(context),
+            ),
+          )
+        ],
       ),
+      
       body: ValueListenableBuilder<List<CarritoItem>>(
         valueListenable: CarritoService.instance.itemsNotifier,
         builder: (context, items, _) {
@@ -53,9 +79,8 @@ class _CarritoPageState extends State<CarritoPage> {
             return _buildEmptyState(context, isDarkMode);
           }
 
-          // Cálculos
           final subtotal = CarritoService.instance.totalAmount;
-          final deliveryFee = 5.00; // Costo fijo por ahora
+          final deliveryFee = 5.00;
           final total = subtotal + deliveryFee;
 
           return SingleChildScrollView(
@@ -77,8 +102,7 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 20),
 
-                // Botón "Añadir más productos" (Visual)
-                SizedBox(
+SizedBox(
                   width: double.infinity,
                   child: TextButton(
                     style: TextButton.styleFrom(
@@ -87,8 +111,7 @@ class _CarritoPageState extends State<CarritoPage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () {
-                      // Aquí podrías navegar al Home o Categorías
-                      // Navigator.pushNamed(context, '/main'); // O cambiar tab
+                      Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
                     },
                     child: Text("Añadir más productos", 
                       style: TextStyle(color: primaryPurple, fontWeight: FontWeight.w600)
@@ -98,13 +121,11 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 30),
 
-                // 2. PROGRAMAR ENTREGA (Fecha y Hora)
                 const Text("Programar fecha y horario de entrega", 
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
                 ),
                 const SizedBox(height: 15),
                 
-                // Selector de Fecha
                 InkWell(
                   onTap: () async {
                     final date = await showDatePicker(
@@ -140,7 +161,6 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 15),
 
-                // Grid de Horarios
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
@@ -171,7 +191,7 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 30),
 
-                // 3. UBICACIÓN (Estática por ahora)
+                // 3. UBICACIÓN
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -183,17 +203,17 @@ class _CarritoPageState extends State<CarritoPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.grey[200], shape: BoxShape.circle),
-                      child: const Icon(Icons.location_on_outlined, color: Colors.black54),
+                      decoration: BoxDecoration(color: isDarkMode ? Colors.white10 : Colors.grey[200], shape: BoxShape.circle),
+                      child: Icon(Icons.location_on_outlined, color: isDarkMode ? Colors.white70 : Colors.black54),
                     ),
                     const SizedBox(width: 15),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Casa", style: TextStyle(fontWeight: FontWeight.bold)),
+                          const Text("Casa", style: TextStyle(fontWeight: FontWeight.bold)),
                           Text("Av. Siempre Viva 123, Springfield", 
-                            style: TextStyle(color: Colors.grey, fontSize: 13), 
+                            style: TextStyle(color: isDarkMode ? Colors.white60 : Colors.grey, fontSize: 13), 
                             maxLines: 1, overflow: TextOverflow.ellipsis
                           ),
                         ],
@@ -204,7 +224,7 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 30),
 
-                // 4. RESUMEN DE COSTOS
+                // 4. RESUMEN
                 _buildCostRow("Subtotal", "PEN ${subtotal.toStringAsFixed(2)}"),
                 const SizedBox(height: 10),
                 _buildCostRow("Cargo del Delivery", "PEN ${deliveryFee.toStringAsFixed(2)}"),
@@ -216,7 +236,7 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 30),
 
-                // 5. MÉTODO DE PAGO
+                // 5. PAGO
                 const Text("Método de Pago", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 15),
                 Container(
@@ -252,7 +272,7 @@ class _CarritoPageState extends State<CarritoPage> {
 
                 const SizedBox(height: 30),
 
-                // 6. BOTÓN FINAL DE PEDIDO
+                // 6. BOTÓN PEDIDO
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -277,7 +297,6 @@ class _CarritoPageState extends State<CarritoPage> {
                   ),
                 ),
                 
-                // Espacio extra para que no choque con el navigation bar
                 const SizedBox(height: 50),
               ],
             ),
@@ -290,7 +309,6 @@ class _CarritoPageState extends State<CarritoPage> {
   Widget _buildProductRow(CarritoItem item, bool isDarkMode, Color cardColor) {
     return Row(
       children: [
-        // Imagen pequeña
         Container(
           width: 60,
           height: 60,
@@ -306,8 +324,6 @@ class _CarritoPageState extends State<CarritoPage> {
           ),
         ),
         const SizedBox(width: 15),
-        
-        // Texto
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,18 +333,12 @@ class _CarritoPageState extends State<CarritoPage> {
                 maxLines: 2, overflow: TextOverflow.ellipsis
               ),
               const SizedBox(height: 4),
-              // Aquí podrías poner "1kg" o "Unidad" si lo tuvieras en el modelo
-              Text("s/ ${item.product.precio}", 
-                style: TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey[400], fontSize: 12)
-              ),
               Text("S/. ${item.product.precio}", 
                 style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepPurple, fontSize: 16)
               ),
             ],
           ),
         ),
-
-        // Controles +/-
         Row(
           children: [
             _buildIconButton(Icons.remove, () => CarritoService.instance.removeOrDecrement(item.product)),
@@ -350,7 +360,7 @@ class _CarritoPageState extends State<CarritoPage> {
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: Colors.deepPurple.withOpacity(0.1), // Lila muy suave
+          color: Colors.deepPurple.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 18, color: Colors.deepPurple),
@@ -394,10 +404,28 @@ class _CarritoPageState extends State<CarritoPage> {
     );
   }
 
+  void _showClearDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("¿Vaciar carrito?"),
+        content: const Text("¿Estás seguro de eliminar todos los productos?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancelar")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              CarritoService.instance.clearCart();
+              Navigator.pop(ctx);
+            },
+            child: const Text("Vaciar", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _procesarPedido(BuildContext context) async {
-
-
     showDialog(
       context: context,
       barrierDismissible: false,

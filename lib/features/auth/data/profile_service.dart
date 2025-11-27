@@ -6,7 +6,7 @@ import 'user_profile_model.dart';
 import '../../../core/utils/session_helper.dart'; // 👈 Importa el helper
 
 class ProfileService {
-  final String _url = "http://10.0.2.2:8081/api/usuarios/me/perfil";
+  final String _url = "http://26.246.241.197:8081/api/usuarios/me/perfil";
 
 Future<UserProfile?> getUserProfile() async {
     try {

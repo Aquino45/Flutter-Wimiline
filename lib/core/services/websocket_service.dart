@@ -21,7 +21,7 @@ class WebSocketService {
     client = StompClient(
       config: StompConfig(
         // URL para emulador Android. Si es dispositivo real usa tu IP local (ej: 192.168.1.X)
-        url: 'ws://10.0.2.2:8081/ws-wimi', 
+        url: 'ws://26.246.241.197:8081/ws-wimi', 
         onConnect: _onConnect,
         onWebSocketError: (dynamic error) => print("Error WS: $error"),
       ),

@@ -1,20 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:proyecto/features/carrito/data/carrito_service.dart';
 import 'package:proyecto/features/productos/data/product_model.dart';
+import 'package:proyecto/features/carrito/data/carrito_service.dart';
+import 'package:proyecto/features/carrito/presentation/carrito_page.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   final Product product;
 
   const ProductDetailPage({super.key, required this.product});
 
   @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  int _quantity = 1;
+  bool _showGoToCart = false; 
+  void _incrementQuantity() {
+    if (_quantity < widget.product.stock) {
+      setState(() => _quantity++);
+    }
+  }
+
+  void _decrementQuantity() {
+    if (_quantity > 1) {
+      setState(() => _quantity--);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
-    final primaryColor = Theme.of(context).primaryColor;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final subTextColor = isDarkMode ? Colors.grey[300] : Colors.grey[700];
+    final primaryPurple = Colors.deepPurple;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -23,16 +43,6 @@ class ProductDetailPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "Detalle del Producto",
-          style: TextStyle(
-            color: textColor, 
-            fontWeight: FontWeight.w600, 
-            fontSize: 17
-          ),
-        ),
-        iconTheme: IconThemeData(color: textColor),
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -41,6 +51,7 @@ class ProductDetailPage extends StatelessWidget {
           ),
           child: IconButton(
             icon: const Icon(Icons.arrow_back, size: 20),
+            color: textColor,
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -48,13 +59,13 @@ class ProductDetailPage extends StatelessWidget {
 
       body: Stack(
         children: [
-          // 1. CAPA DE FONDO Y CONTENIDO (Scrollable)
+          // 1. CONTENIDO SCROLLEABLE
           SingleChildScrollView(
             physics: const BouncingScrollPhysics(), 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🖼 SECCIÓN DE IMAGEN
+                // 🖼 IMAGEN
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 110, 20, 40),
@@ -71,86 +82,56 @@ class ProductDetailPage extends StatelessWidget {
                             end: Alignment.bottomCenter,
                             colors: [Colors.white, Colors.white],
                           ),
-                    boxShadow: [
-                      if (!isDarkMode)
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                    ],
                   ),
                   child: Hero(
-                    tag: product.imagenUrl,
-                    child: Center(
-                      child: CachedNetworkImage(
-                        imageUrl: product.imagenUrl,
-                        height: 280,
-                        fit: BoxFit.contain,
-                        progressIndicatorBuilder: (context, url, downloadProgress) => Center(
-                          child: CircularProgressIndicator(
-                            value: downloadProgress.progress, 
-                            color: primaryColor
-                          )
-                        ),
-                        errorWidget: (context, url, error) => 
-                          Icon(Icons.image_not_supported_outlined, size: 50, color: subTextColor),
-                      ),
+                    tag: widget.product.imagenUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.product.imagenUrl,
+                      height: 280,
+                      fit: BoxFit.contain,
+                      errorWidget: (_,__,___) => Icon(Icons.image_not_supported, size: 50, color: subTextColor),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 25),
 
-                // 📝 INFORMACIÓN DEL PRODUCTO
+                // 📝 INFO
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título
                       Text(
-                        product.nombre,
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                          height: 1.2,
-                        ),
+                        widget.product.nombre,
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: textColor, height: 1.2),
                       ),
                       const SizedBox(height: 15),
                       
-                      // Precio y Stock
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "\$${product.precio.toStringAsFixed(2)}",
+                            "S/. ${widget.product.precio.toStringAsFixed(2)}",
                             style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              color: isDarkMode ? Colors.deepPurpleAccent.shade100 : primaryColor,
+                              fontSize: 32, fontWeight: FontWeight.w900,
+                              color: isDarkMode ? Colors.deepPurpleAccent.shade100 : primaryPurple,
                             ),
                           ),
-                          
+                          // Chip de stock...
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: product.stock > 0 
+                              color: widget.product.stock > 0 
                                   ? (isDarkMode ? Colors.green.withOpacity(0.2) : Colors.green.shade50)
                                   : (isDarkMode ? Colors.red.withOpacity(0.2) : Colors.red.shade50),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: product.stock > 0 
-                                    ? (isDarkMode ? Colors.greenAccent.withOpacity(0.5) : Colors.green.shade200)
-                                    : (isDarkMode ? Colors.redAccent.withOpacity(0.5) : Colors.red.shade200)
-                              ),
                             ),
                             child: Text(
-                              product.stock > 0 ? "Stock: ${product.stock}" : "Agotado",
+                              widget.product.stock > 0 ? "Stock: ${widget.product.stock}" : "Agotado",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: product.stock > 0 
+                                color: widget.product.stock > 0 
                                     ? (isDarkMode ? Colors.greenAccent : Colors.green.shade700)
                                     : (isDarkMode ? Colors.redAccent : Colors.red.shade700),
                               ),
@@ -160,38 +141,15 @@ class ProductDetailPage extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 25),
-
-                      // Descripción
-                      if (product.descripcion != null && product.descripcion!.trim().isNotEmpty) ...[
+                      // Descripción y Detalles...
+                      if (widget.product.descripcion != null) ...[
                         Text("Descripción", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
                         const SizedBox(height: 8),
-                        Text(
-                          product.descripcion!,
-                          style: TextStyle(fontSize: 16, height: 1.5, color: subTextColor),
-                        ),
-                        const SizedBox(height: 20),
+                        Text(widget.product.descripcion!, style: TextStyle(fontSize: 16, height: 1.5, color: subTextColor)),
                       ],
+                      
 
-                      // Especificaciones
-                      if (product.detalles != null && product.detalles!.trim().isNotEmpty) ...[
-                        Text("Especificaciones", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
-                        const SizedBox(height: 10),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                          ),
-                          child: Text(
-                            product.detalles!,
-                            style: TextStyle(fontSize: 15, height: 1.4, color: subTextColor),
-                          ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 100), 
+                      SizedBox(height: _showGoToCart ? 220 : 160), 
                     ],
                   ),
                 ),
@@ -199,7 +157,7 @@ class ProductDetailPage extends StatelessWidget {
             ),
           ),
 
-          // 2. CAPA DEL BOTÓN (Flotante abajo)
+
           Positioned(
             bottom: 0,
             left: 0,
@@ -212,52 +170,159 @@ class ProductDetailPage extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     backgroundColor.withOpacity(0.0),
-                    backgroundColor.withOpacity(0.8),
+                    backgroundColor.withOpacity(0.95),
                     backgroundColor,
                   ],
-                  stops: const [0.0, 0.3, 1.0],
+                  stops: const [0.0, 0.2, 1.0],
                 ),
               ),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  // 🔥 FORZAMOS EL MORADO INTENSO (DeepPurple)
-                  backgroundColor: Colors.deepPurple, 
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(50),
-                  elevation: 8,
-                  shadowColor: Colors.deepPurple.withOpacity(0.5), // Sombra acorde
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                ),
-                  onPressed: () {
-                  // ✅ LLAMADA AL SERVICIO
-                  CarritoService.instance.addToCart(product);
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text("${product.nombre} agregado")),
-                        ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildQuantityButton(
+                        icon: Icons.remove,
+                        onTap: _decrementQuantity,
+                        isEnabled: _quantity > 1,
+                        isDarkMode: isDarkMode,
                       ),
-                      backgroundColor: Colors.green.shade600,
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 1), // Más rápido
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Text(
+                          "$_quantity",
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+                        ),
+                      ),
+                      _buildQuantityButton(
+                        icon: Icons.add,
+                        onTap: _incrementQuantity,
+                        isEnabled: _quantity < widget.product.stock,
+                        isDarkMode: isDarkMode,
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 20),
+
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryPurple, 
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(55),
+                      elevation: 8,
+                      shadowColor: primaryPurple.withOpacity(0.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                     ),
-                  );
-                },
-                child: const Text(
-                  "Agregar al Carrito",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                    onPressed: widget.product.stock > 0 ? () {
+
+                      for (int i = 0; i < _quantity; i++) {
+                        CarritoService.instance.addToCart(widget.product);
+                      }
+                      
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("$_quantity x ${widget.product.nombre} agregado"),
+                          backgroundColor: Colors.green,
+                          duration: const Duration(milliseconds: 1500),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+
+
+                      setState(() {
+                        _showGoToCart = true;
+                        _quantity = 1;
+                      });
+                    } : null,
+                    child: Text(
+widget.product.stock > 0 
+                          ? "Agregar al Carrito - S/. ${(widget.product.precio * _quantity).toStringAsFixed(2)}" // 👈 CAMBIO AQUÍ
+                          : "Sin Stock",
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: _showGoToCart ? Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      width: double.infinity,
+                      height: 55,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primaryPurple, width: 2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          backgroundColor: isDarkMode ? Colors.deepPurple.withOpacity(0.1) : Colors.white,
+                        ),
+                        onPressed: () {
+                          // Navegar al carrito
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const CarritoPage()),
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Ir al Carrito",
+                              style: TextStyle(
+                                fontSize: 18, 
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : primaryPurple
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.arrow_forward, color: isDarkMode ? Colors.white : primaryPurple)
+                          ],
+                        ),
+                      ),
+                    ) : const SizedBox.shrink(), // Oculto si es false
+                  ),
+                ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityButton({
+    required IconData icon, 
+    required VoidCallback onTap, 
+    required bool isEnabled,
+    required bool isDarkMode
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode 
+            ? (isEnabled ? Colors.deepPurple.withOpacity(0.3) : Colors.grey.withOpacity(0.1))
+            : (isEnabled ? Colors.deepPurple.shade50 : Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isEnabled ? Colors.deepPurple.withOpacity(0.5) : Colors.transparent
+        ),
+      ),
+      child: InkWell(
+        onTap: isEnabled ? onTap : null,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Icon(
+            icon, 
+            color: isEnabled 
+                ? (isDarkMode ? Colors.white : Colors.deepPurple) 
+                : Colors.grey,
+            size: 26,
+          ),
+        ),
       ),
     );
   }

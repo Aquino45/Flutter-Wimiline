@@ -20,10 +20,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final passwordController = TextEditingController();
 
   final repo = AuthRepositoryImpl();
-  bool _isLoading = false; // Para mostrar un spinner mientras carga
-
+  bool _isLoading = false; 
   void _register() async {
-    // 1. Validaciones básicas
+
     if (nombreController.text.isEmpty ||
         apellidoController.text.isEmpty ||
         emailController.text.isEmpty ||
@@ -38,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     setState(() {
-      _isLoading = true; // Activar carga
+      _isLoading = true; 
     });
 
     try {
@@ -50,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordController.text,
       );
 
-      // 2. Llamada al Backend
+
       final success = await repo.register(user);
 
       if (success && mounted) {
@@ -61,12 +60,12 @@ class _RegisterPageState extends State<RegisterPage> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // Volver al Login
+        Navigator.pop(context); 
       }
     } catch (e) {
-      // 4. Manejo de Errores (Ej: Email duplicado)
+
       if (mounted) {
-        // Limpiamos el mensaje de error para que sea legible (quitamos "Exception:")
+
         final errorMessage = e.toString().replaceAll("Exception: ", "");
         
         ScaffoldMessenger.of(context).showSnackBar(

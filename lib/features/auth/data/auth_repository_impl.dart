@@ -7,7 +7,7 @@ import '../domain/usuario.dart';
 import 'usuario_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final String baseUrl = "http://10.0.2.2:8081/api/auth";
+  final String baseUrl = "http://26.246.241.197:8081/api/auth";
 
   @override
   Future<bool> register(Usuario usuario) async {

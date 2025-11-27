@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomInput extends StatelessWidget {
+class CustomInput extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final bool isPassword;
@@ -17,16 +17,42 @@ class CustomInput extends StatelessWidget {
   });
 
   @override
+  _CustomInputState createState() => _CustomInputState();
+}
+
+class _CustomInputState extends State<CustomInput> {
+  bool _obscureText = true;
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      keyboardType: keyboard,
-      style: const TextStyle(fontSize: 16),
+      controller: widget.controller,
+      obscureText: widget.isPassword ? _obscureText : false,
+      keyboardType: widget.keyboard,
+      
+
+      style: const TextStyle(
+        fontSize: 16, 
+        color: Colors.black, 
+        fontWeight: FontWeight.w500 
+      ), 
+      
       decoration: InputDecoration(
-        prefixIcon: icon != null ? Icon(icon) : null,
-        labelText: label,
-        labelStyle: const TextStyle(fontSize: 15),
+        prefixIcon: widget.icon != null ? Icon(widget.icon, color: Colors.deepPurple) : null,
+        labelText: widget.label,
+        
+
+        labelStyle: TextStyle(
+          fontSize: 15, 
+          color: Colors.grey.shade800 
+        ),
+        
         filled: true,
         fillColor: Colors.grey.shade100,
         contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -37,6 +63,15 @@ class CustomInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
         ),
+        suffixIcon: widget.isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.deepPurple,
+                ),
+                onPressed: _togglePasswordVisibility,
+              )
+            : null,
       ),
     );
   }

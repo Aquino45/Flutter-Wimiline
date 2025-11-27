@@ -64,13 +64,13 @@ class CarritoService {
     itemsNotifier.value = [];
   }
 
-  // ... métodos anteriores (addToCart, removeItem, etc) ...
+
 
   // 🚀 NUEVO: ENVIAR PEDIDO AL BACKEND
   Future<bool> realizarPedido() async {
     if (items.isEmpty) return false;
 
-    const String url = "http://10.0.2.2:8081/api/pedidos/checkout";
+    const String url = "http://26.246.241.197:8081/api/pedidos/checkout";
 
     try {
       // 1. Obtener el token guardado

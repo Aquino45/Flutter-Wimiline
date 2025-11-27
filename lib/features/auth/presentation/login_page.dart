@@ -90,7 +90,8 @@ class LoginPage extends StatelessWidget {
               CustomInput(
                 controller: password,
                 label: "Password",
-                isPassword: true,
+                isPassword:
+                    true, // Asegúrate de que esté como campo de contraseña
                 icon: Icons.lock_outline,
               ),
 

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'product_model.dart';
 
 class ProductApi {
-  static const String _baseUrl = "http://10.0.2.2:8081/api/productos";
+  static const String _baseUrl = "http://26.246.241.197:8081/api/productos";
 
   // 🔹 Obtener todos los productos
   Future<List<Product>> fetchProducts() async {
